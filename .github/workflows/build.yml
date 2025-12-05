@@ -1,0 +1,45 @@
+name: APK Yapici
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Kodu Cek
+      uses: actions/checkout@v3
+
+    - name: Python Kur
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Java Kur (Android icin)
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Flutter Kur
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.19.0'
+
+    - name: Flet ve Gereksinimleri Kur
+      run: |
+        pip install flet
+        pip install -r requirements.txt
+
+    - name: APK Insasini Baslat
+      run: |
+        flet build apk --verbose
+
+    - name: APK Dosyasini Yukle (Artifacts)
+      uses: actions/upload-artifact@v4
+      with:
+        name: cepte-butce-apk
+        path: build/apk/app-release.apk
