@@ -186,9 +186,10 @@ def main(page: ft.Page):
 
         # --- HESAP MAKİNESİ ---
         def hesap_makinesini_ac(e):
+            # HATA DÜZELTME: Renk kodları sadeleştirildi.
             txt_color = "onSurface"
             bg_color = "surfaceVariant"
-            tus_bg = "grey,300" if page.theme_mode == ft.ThemeMode.LIGHT else "grey,800"
+            tus_bg = "grey" # 'grey,300' hatası giderildi
             tema_renk = "blue" if aktif_hesap == "kisisel" else "orange"
             
             txt_result = ft.Text(value="0", color=txt_color, size=40, weight="bold", text_align="right")
@@ -253,8 +254,8 @@ def main(page: ft.Page):
             def sil_islem_ve_yenile(x):
                 islemler.remove(x)
                 verileri_guncelle()
-                liste_konteyner.controls = liste_olustur()
-                liste_konteyner.update()
+                # HATA DÜZELTME: Sadece listeyi değil, TÜM SAYFAYI yeniliyoruz ki BAKİYE güncellensin
+                sayfa_guncelle(0) 
                 page.snack_bar = ft.SnackBar(ft.Text("İşlem silindi"), bgcolor="red"); page.snack_bar.open = True; page.update()
 
             liste_konteyner.controls = liste_olustur()
@@ -263,7 +264,6 @@ def main(page: ft.Page):
             return ft.Container(content=ft.Column([
                 ft.Container(padding=20, border_radius=ft.border_radius.only(bottom_left=30, bottom_right=30), bgcolor=tema_renk, content=ft.Column([
                     ft.Row([ft.IconButton(ft.Icons.MENU, icon_color="white", on_click=menuyu_ac), 
-                            # HATA DÜZELTME: SegmentedButton 'style' parametresi kaldırıldı. Standart görünüm kullanılacak.
                             ft.SegmentedButton(selected={aktif_hesap}, on_change=hesap_degistir, allow_multiple_selection=False, allow_empty_selection=False, segments=[ft.Segment(value="kisisel", label=ft.Text("🏠"), icon=ft.Icon(ft.Icons.HOME)), ft.Segment(value="is", label=ft.Text("🏪"), icon=ft.Icon(ft.Icons.STORE))]), 
                             ft.IconButton(ft.Icons.CALCULATE, icon_color="white", on_click=hesap_makinesini_ac)], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
                     ft.Container(height=15), ft.Text("Nakit Durumu (Bakiye)", color="white70", size=12), ft.Text(f"{bakiye} TL", size=40, weight="bold", color="white"), ft.Container(height=20),
@@ -330,14 +330,15 @@ def main(page: ft.Page):
                 liste_guncelle()
                 page.dialog = rounded_dialog("Aboneliklerim", ft.Container(content=liste_col, height=300, width=300), [ft.TextButton("Kapat", on_click=lambda e: setattr(page.dialog, 'open', False) or page.update())])
                 page.dialog.open = True; page.update()
-
+            
+            # HATA DÜZELTME: Butonlardaki 'style' parametresi kaldırıldı, normal buton yapıldı.
             return ft.Container(padding=20, content=ft.Column([
                 ft.Text("Yeni İşlem", size=24, weight="bold", color="onSurface"), ft.Container(padding=10, border_radius=10, bgcolor="blue50" if aktif_hesap == "kisisel" else "orange50", content=ft.Row([ft.Icon(ft.Icons.INFO, color="blue" if aktif_hesap == "kisisel" else "orange"), ft.Text(f"Bu işlem '{'EV' if aktif_hesap == 'kisisel' else 'İŞ YERİ'}' hesabına eklenecek.", color="black", weight="bold")])), ft.Container(height=20),
                 input_style(txt_desc), ft.Container(height=15), input_style(txt_amount), ft.Container(height=15), input_style(txt_vade),
                 ft.Container(height=15), ft.Container(content=radio_tur, bgcolor=ibg, padding=10, border_radius=15),
                 ft.Container(height=25), ft.ElevatedButton("KAYDET", on_click=kaydet_tikla, bgcolor="blue" if aktif_hesap=="kisisel" else "orange", color="white", width=400, height=50),
                 ft.Container(height=10),
-                ft.Row([ft.OutlinedButton("ABONELİK EKLE", on_click=abonelik_ekle_dialog, style=ft.ButtonStyle(color="orange"), expand=True), ft.Container(width=10), ft.OutlinedButton("YÖNET", on_click=abonelikleri_yonet_dialog, style=ft.ButtonStyle(color="blue"), expand=True)])
+                ft.Row([ft.OutlinedButton("ABONELİK EKLE", on_click=abonelik_ekle_dialog, expand=True), ft.Container(width=10), ft.OutlinedButton("YÖNET", on_click=abonelikleri_yonet_dialog, expand=True)])
             ], scroll=ft.ScrollMode.AUTO))
 
         # --- 3. VARLIKLAR SAYFASI ---
@@ -426,7 +427,7 @@ def main(page: ft.Page):
                     ft.Container(height=5),
                     ft.Row([ft.Text(f"{h['biriken']:,.0f} / {h['hedef']:,.0f} TL".replace(",", "."), size=12, color="onSurfaceVariant"), ft.Text(f"%{int(yuzde*100)}", weight="bold", color=renk)], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
                     ft.Container(height=10),
-                    ft.OutlinedButton("Para Ekle / Düzenle", icon=ft.Icons.EDIT, on_click=lambda e, x=h: hedef_guncelle_dialog(x), style=ft.ButtonStyle(color="primary"))
+                    ft.OutlinedButton("Para Ekle / Düzenle", icon=ft.Icons.EDIT, on_click=lambda e, x=h: hedef_guncelle_dialog(x))
                 ])), margin=ft.margin.only(bottom=10)))
 
             return ft.Container(content=ft.Column([
