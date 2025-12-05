@@ -2,14 +2,21 @@ import flet as ft
 from datetime import datetime
 import csv
 import sqlite3
-import os # <--- EKLENDİ: Telefonda dosya yolu bulmak için şart
+import os
 
 # --- VERİTABANI YÖNETİCİSİ ---
 class Database:
     def __init__(self):
-        # --- DÜZELTME: MOBİL İÇİN GÜVENLİ DOSYA YOLU ---
-        # Bu satır hem PC'de hem Telefond'da çalışacak "Belgelerim/Data" klasörünü bulur.
-        self.db_yolu = os.path.join(os.path.expanduser("~"), "cepte_butce.db")
+        # Android için güvenli dosya yolu
+        try:
+            # Android'de genellikle kullanıcı dizini güvenlidir
+            base_dir = os.path.expanduser("~")
+            if not os.path.exists(base_dir):
+                os.makedirs(base_dir) # Klasör yoksa oluştur
+            self.db_yolu = os.path.join(base_dir, "cepte_butce.db")
+        except:
+            # Eğer yukarıdaki çalışmazsa, mevcut çalışma dizinini dene
+            self.db_yolu = "cepte_butce.db"
         
         self.conn = sqlite3.connect(self.db_yolu, check_same_thread=False)
         self.cursor = self.conn.cursor()
@@ -79,9 +86,15 @@ class Database:
             sonuc.append(dict(zip(col_names, row)))
         return sonuc
 
-db = Database()
+# HATA DÜZELTME: db = Database() BURADAN SİLİNDİ.
+# Artık veritabanı uygulama başladıktan sonra yüklenecek.
 
 def main(page: ft.Page):
+    # --- KRİTİK DÜZELTME ---
+    # Veritabanını TAM BURADA, uygulama başladığında çağırıyoruz.
+    # Böylece telefon dosya izinlerini vermiş oluyor.
+    db = Database() 
+
     page.title = "Cepte Bütçe & Varlık"
     page.padding = 0 
     page.window_width = 400
