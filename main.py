@@ -2,11 +2,16 @@ import flet as ft
 from datetime import datetime
 import csv
 import sqlite3
+import os # <--- EKLENDİ: Telefonda dosya yolu bulmak için şart
 
 # --- VERİTABANI YÖNETİCİSİ ---
 class Database:
     def __init__(self):
-        self.conn = sqlite3.connect("cepte_butce.db", check_same_thread=False)
+        # --- DÜZELTME: MOBİL İÇİN GÜVENLİ DOSYA YOLU ---
+        # Bu satır hem PC'de hem Telefond'da çalışacak "Belgelerim/Data" klasörünü bulur.
+        self.db_yolu = os.path.join(os.path.expanduser("~"), "cepte_butce.db")
+        
+        self.conn = sqlite3.connect(self.db_yolu, check_same_thread=False)
         self.cursor = self.conn.cursor()
         self.tablolari_olustur()
 
@@ -215,11 +220,13 @@ def main(page: ft.Page):
             elif idx == 1: nav_change_manuel(5); page.drawer.open = False; page.update()
             elif idx == 2:
                 try:
-                    with open("cepte_butce_yedek.csv", 'w', newline='', encoding='utf-8-sig') as f:
+                    # --- DÜZELTME: Yedekleme dosya yolu telefona uygun hale getirildi ---
+                    csv_yolu = os.path.join(os.path.expanduser("~"), "cepte_butce_yedek.csv")
+                    with open(csv_yolu, 'w', newline='', encoding='utf-8-sig') as f:
                         w = csv.writer(f); w.writerow(["TÜR", "DETAY..."])
                         for i in islemler: w.writerow(["İşlem", i['baslik'], i['tutar']])
-                    bildirim_goster("Yedeklendi: cepte_butce_yedek.csv")
-                except: bildirim_goster("Hata", "red")
+                    bildirim_goster(f"Yedeklendi: {csv_yolu}")
+                except Exception as ex: bildirim_goster(f"Hata: {str(ex)}", "red")
             elif idx == 3:
                 db.tumunu_sil(); islemler.clear(); varliklar.clear(); hedefler.clear(); notlar.clear(); abonelikler.clear()
                 nav_change_manuel(0); page.drawer.open = False; page.update(); bildirim_goster("Sıfırlandı", "red")
