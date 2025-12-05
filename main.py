@@ -7,7 +7,7 @@ def main(page: ft.Page):
     try:
         page.title = "Cepte Bütçe & Varlık"
         page.padding = 0 
-        page.scroll = None 
+        page.scroll = None # Siyah ekran önleyici
 
         # --- TEMA AYARLARI ---
         kayitli_tema = page.client_storage.get("tema_tercihi")
@@ -131,10 +131,10 @@ def main(page: ft.Page):
             return ft.AlertDialog(
                 title=ft.Text(title, weight="bold"), 
                 content=content, 
-                actions=actions, 
-                shape=ft.RoundedRectangleBorder(radius=25)
+                actions=actions
             )
 
+        # RENK KODU DÜZELTİLDİ: "surfaceVariant" string olarak kullanılıyor
         def input_style(c): 
             return ft.Container(content=c, bgcolor="surfaceVariant", border_radius=20, padding=10)
 
@@ -184,12 +184,11 @@ def main(page: ft.Page):
             sayfa_guncelle(nav_bar.selected_index)
             bildirim_goster(f"Mod Değişti: {aktif_hesap}", "blue")
 
-        # --- HESAP MAKİNESİ ---
+        # --- HESAP MAKİNESİ (DÜZELTİLDİ: Renk kodları basitleştirildi) ---
         def hesap_makinesini_ac(e):
-            # HATA DÜZELTME: Renk kodları sadeleştirildi.
             txt_color = "onSurface"
             bg_color = "surfaceVariant"
-            tus_bg = "grey" # 'grey,300' hatası giderildi
+            tus_bg = "grey"
             tema_renk = "blue" if aktif_hesap == "kisisel" else "orange"
             
             txt_result = ft.Text(value="0", color=txt_color, size=40, weight="bold", text_align="right")
@@ -254,8 +253,8 @@ def main(page: ft.Page):
             def sil_islem_ve_yenile(x):
                 islemler.remove(x)
                 verileri_guncelle()
-                # HATA DÜZELTME: Sadece listeyi değil, TÜM SAYFAYI yeniliyoruz ki BAKİYE güncellensin
-                sayfa_guncelle(0) 
+                # DÜZELTME: Bakiye güncellemesi için tüm sayfayı yeniliyoruz
+                sayfa_guncelle(0)
                 page.snack_bar = ft.SnackBar(ft.Text("İşlem silindi"), bgcolor="red"); page.snack_bar.open = True; page.update()
 
             liste_konteyner.controls = liste_olustur()
@@ -296,6 +295,7 @@ def main(page: ft.Page):
                     verileri_guncelle(); bildirim_goster("Kaydedildi!"); nav_change_manuel(0)
                 except: bildirim_goster("Tutar hatalı!", "red")
 
+            # ABONELİK FONKSİYONLARI (DÜZELTİLDİ: Stil parametreleri kaldırıldı, renkler basitleştirildi)
             def abonelik_ekle_dialog(e):
                 a_baslik = ft.TextField(label="Abonelik Adı", hint_text="Netflix, Kira...")
                 a_tutar = ft.TextField(label="Aylık Tutar", keyboard_type="number")
@@ -330,14 +330,14 @@ def main(page: ft.Page):
                 liste_guncelle()
                 page.dialog = rounded_dialog("Aboneliklerim", ft.Container(content=liste_col, height=300, width=300), [ft.TextButton("Kapat", on_click=lambda e: setattr(page.dialog, 'open', False) or page.update())])
                 page.dialog.open = True; page.update()
-            
-            # HATA DÜZELTME: Butonlardaki 'style' parametresi kaldırıldı, normal buton yapıldı.
+
             return ft.Container(padding=20, content=ft.Column([
                 ft.Text("Yeni İşlem", size=24, weight="bold", color="onSurface"), ft.Container(padding=10, border_radius=10, bgcolor="blue50" if aktif_hesap == "kisisel" else "orange50", content=ft.Row([ft.Icon(ft.Icons.INFO, color="blue" if aktif_hesap == "kisisel" else "orange"), ft.Text(f"Bu işlem '{'EV' if aktif_hesap == 'kisisel' else 'İŞ YERİ'}' hesabına eklenecek.", color="black", weight="bold")])), ft.Container(height=20),
                 input_style(txt_desc), ft.Container(height=15), input_style(txt_amount), ft.Container(height=15), input_style(txt_vade),
                 ft.Container(height=15), ft.Container(content=radio_tur, bgcolor=ibg, padding=10, border_radius=15),
                 ft.Container(height=25), ft.ElevatedButton("KAYDET", on_click=kaydet_tikla, bgcolor="blue" if aktif_hesap=="kisisel" else "orange", color="white", width=400, height=50),
                 ft.Container(height=10),
+                # STYLE parametresi silindi, normal buton yapıldı
                 ft.Row([ft.OutlinedButton("ABONELİK EKLE", on_click=abonelik_ekle_dialog, expand=True), ft.Container(width=10), ft.OutlinedButton("YÖNET", on_click=abonelikleri_yonet_dialog, expand=True)])
             ], scroll=ft.ScrollMode.AUTO))
 
@@ -387,7 +387,7 @@ def main(page: ft.Page):
                 ft.Container(padding=20, content=ft.Column([ft.Row([ft.Text("LİSTE", size=14, weight="bold", color="onSurfaceVariant"), ft.IconButton(ft.Icons.ADD_CIRCLE, icon_color="purple", tooltip="Ekle", on_click=lambda e: page.open(dlg_modal))], alignment=ft.MainAxisAlignment.SPACE_BETWEEN), ft.Container(height=10), ft.Column(ac)]))
             ], scroll=ft.ScrollMode.AUTO))
 
-        # --- 4. HEDEFLER SAYFASI ---
+        # --- 4. HEDEFLER SAYFASI (GERİ GETİRİLDİ) ---
         def goals_view():
             ibg, icol = "surfaceVariant", "onSurface"
             t_baslik = ft.TextField(label="Hedef Adı", hint_text="Örn: Araba", border_color="orange", bgcolor=ibg, color=icol)
@@ -435,7 +435,7 @@ def main(page: ft.Page):
                 ft.Container(padding=20, content=ft.Column([ft.Row([ft.Text("HEDEFLERİM", size=14, weight="bold", color="onSurfaceVariant"), ft.IconButton(ft.Icons.ADD_CIRCLE, icon_color="teal", tooltip="Yeni Hedef", on_click=lambda e: page.open(dlg_add))], alignment=ft.MainAxisAlignment.SPACE_BETWEEN), ft.Container(height=10), ft.Column(cards)]))
             ], scroll=ft.ScrollMode.AUTO))
 
-        # --- 5. NOTLAR SAYFASI ---
+        # --- 5. NOTLAR SAYFASI (GERİ GETİRİLDİ) ---
         def notes_view():
             ibg, icol = "transparent", "onSurface"
             t_baslik = ft.TextField(label="Başlık", hint_text="Örn: Fatura", border_color="indigo", bgcolor=ibg, color=icol)
@@ -471,7 +471,7 @@ def main(page: ft.Page):
                 ft.Container(padding=20, content=ft.Column([ft.Row([ft.Text("NOTLARIM", size=14, weight="bold", color="onSurfaceVariant"), ft.IconButton(ft.Icons.ADD_CIRCLE, icon_color="indigo", tooltip="Yeni Not", on_click=lambda e: page.open(dlg_add))], alignment=ft.MainAxisAlignment.SPACE_BETWEEN), ft.Container(height=10), ft.Column(cards)]))
             ], scroll=ft.ScrollMode.AUTO))
 
-        # 6. Analiz Sayfası
+        # --- 6. ANALİZ SAYFASI (GERİ GETİRİLDİ) ---
         def stats_view():
             tc = "onSurface"
             center_text = ft.Text("0 TL", size=20, weight=ft.FontWeight.BOLD, color=tc)
