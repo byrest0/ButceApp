@@ -1,18 +1,16 @@
 import flet as ft
 from datetime import datetime
 import csv
-import traceback # Hata takibi için eklendi
+import traceback # Hata takibi için gerekli
 
 def main(page: ft.Page):
-    # --- KRİTİK DÜZELTME BAŞLANGICI ---
-    # Tüm kodu try-except içine alıyoruz ki hata varsa telefonda görebilelim.
+    # HATA YAKALAYICI BAŞLANGICI
     try:
         page.title = "Cepte Bütçe & Varlık"
         page.padding = 0 
-        # page.window_width ve height MOBİLDE SİLİNMELİDİR.
         
-        # MOBİLDE SİYAH EKRANIN ANA SEBEBİ BURASIYDI:
-        # Sayfanın kendisi scroll olmamalı, içerikteki column scroll oluyor zaten.
+        # MOBİLDE SİYAH EKRAN SORUNU İÇİN KAYDIRMAYI KAPATIYORUZ
+        # (İçerik kendi içinde kayacak)
         page.scroll = None 
 
         # --- TEMA AYARLARI ---
@@ -125,17 +123,18 @@ def main(page: ft.Page):
         aktif_hesap = "kisisel" 
 
         # --- UI BİLEŞENLERİ ---
-        # Container expand=True olduğu için page.scroll OLMAMALI
         container = ft.Container(expand=True)
         
+        # --- DÜZELTME BURADA YAPILDI ---
+        # NavigationDestination -> NavigationBarDestination olarak değiştirildi.
         nav_bar = ft.NavigationBar(
             selected_index=0,
             destinations=[
-                ft.NavigationDestination(icon=ft.Icons.HOME, label="Özet"),      
-                ft.NavigationDestination(icon=ft.Icons.ADD_CIRCLE, label="Ekle"), 
-                ft.NavigationDestination(icon=ft.Icons.DIAMOND, label="Varlık"), 
-                ft.NavigationDestination(icon=ft.Icons.SAVINGS, label="Hedef"),
-                ft.NavigationDestination(icon=ft.Icons.PIE_CHART, label="Analiz"),
+                ft.NavigationBarDestination(icon=ft.Icons.HOME, label="Özet"),      
+                ft.NavigationBarDestination(icon=ft.Icons.ADD_CIRCLE, label="Ekle"), 
+                ft.NavigationBarDestination(icon=ft.Icons.DIAMOND, label="Varlık"), 
+                ft.NavigationBarDestination(icon=ft.Icons.SAVINGS, label="Hedef"),
+                ft.NavigationBarDestination(icon=ft.Icons.PIE_CHART, label="Analiz"),
             ]
         )
 
@@ -167,9 +166,7 @@ def main(page: ft.Page):
         # --- MENÜ FONKSİYONLARI ---
         def verileri_yedekle(e):
             try:
-                # MOBILDE DOSYA KAYDETMEK İÇİN İZİN GEREKİR
-                # Şimdilik sadece toast mesaj gösteriyoruz, çünkü root dizine yazamaz
-                bildirim_goster("Dosya yedekleme mobilde farklı izinler gerektirir.", "orange")
+                bildirim_goster("Dosya yedekleme mobilde kısıtlıdır.", "orange")
                 page.drawer.open = False
                 page.update()
             except Exception as ex: bildirim_goster(f"Hata: {str(ex)}", "red")
@@ -594,17 +591,16 @@ def main(page: ft.Page):
         nav_bar.on_change = nav_bar_tiklandi
         page.add(container, nav_bar)
         
-        # Bu kısım bazen hataya düşebiliyor, try içine aldık
         abonelikleri_kontrol_et()
         nav_change_manuel(0)
 
     except Exception as e:
-        # EĞER HATA OLURSA SİYAH EKRAN YERİNE BUNU GÖSTERECEK
+        # HATA GÖSTERİCİ: EĞER BAŞKA BİR SORUN ÇIKARSA SİYAH EKRAN YERİNE BURASI AÇILIR
         err_msg = traceback.format_exc()
         page.add(ft.Column([
             ft.Text("UYGULAMA BAŞLATILAMADI", color="red", size=20, weight="bold"),
             ft.Text(f"Hata Detayı: {e}", color="white"),
-            ft.Text(err_msg, color="yellow", size=10) # Hatanın tam dökümü
+            ft.Text(err_msg, color="yellow", size=10)
         ], scroll=ft.ScrollMode.AUTO))
         page.update()
 
