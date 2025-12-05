@@ -7,7 +7,7 @@ def main(page: ft.Page):
     try:
         page.title = "Cepte Bütçe & Varlık"
         page.padding = 0 
-        page.scroll = None # Siyah ekran önleyici
+        page.scroll = None 
 
         # --- TEMA AYARLARI ---
         kayitli_tema = page.client_storage.get("tema_tercihi")
@@ -42,7 +42,6 @@ def main(page: ft.Page):
         varsayilan_varliklar = [
             {"ad": "Dolar (USD)", "miktar": "100", "tarih": bugun_str, "detay": "Nakit"},
         ]
-        
         varliklar = page.client_storage.get("varlik_verileri_v17")
         if varliklar is None:
             varliklar = varsayilan_varliklar
@@ -55,7 +54,6 @@ def main(page: ft.Page):
         varsayilan_hedefler = [
             {"baslik": "Araba", "hedef": 800000.0, "biriken": 150000.0},
         ]
-        
         hedefler = page.client_storage.get("hedef_verileri_v1")
         if hedefler is None:
             hedefler = varsayilan_hedefler
@@ -137,7 +135,6 @@ def main(page: ft.Page):
                 shape=ft.RoundedRectangleBorder(radius=25)
             )
 
-        # "ft.colors.SURFACE_VARIANT" yerine direkt "surfaceVariant" stringini kullanıyoruz
         def input_style(c): 
             return ft.Container(content=c, bgcolor="surfaceVariant", border_radius=20, padding=10)
 
@@ -189,7 +186,6 @@ def main(page: ft.Page):
 
         # --- HESAP MAKİNESİ ---
         def hesap_makinesini_ac(e):
-            # ft.colors yerine string kullanımı
             txt_color = "onSurface"
             bg_color = "surfaceVariant"
             tus_bg = "grey,300" if page.theme_mode == ft.ThemeMode.LIGHT else "grey,800"
@@ -232,14 +228,11 @@ def main(page: ft.Page):
                 gecmis_l = sorted([x for x in tum if x['tarih'] != bugun_str], key=lambda x: x['tarih'], reverse=True)
 
                 def kart(x):
-                    # Renkleri string olarak tanımladık
                     c, i, s = ("green", ft.Icons.TRENDING_UP, "+") if x['tur'] == 'gelir' else ("red", ft.Icons.TRENDING_DOWN, "-") if x['tur'] == 'gider' else ("blue", ft.Icons.ARROW_CIRCLE_DOWN, "(A)") if x['tur'] == 'alacak' else ("orange", ft.Icons.ARROW_CIRCLE_UP, "(B)")
                     d_str = datetime.strptime(x['tarih'], "%Y-%m-%d").strftime("%d.%m.%Y") if x['tarih'] else ""
                     if x.get('vade'): d_str += f" | ⏳ {x['vade']}"
                     
-                    # ft.colors.with_opacity yerine basit renkler ve surfaceVariant kullandık
                     return ft.Container(padding=15, margin=ft.margin.only(bottom=10), border_radius=15, bgcolor="surfaceVariant", 
-                        # Shadow mobilde bazen sorun çıkarırsa diye basit tutuyoruz
                         shadow=ft.BoxShadow(blur_radius=5, color="black"), 
                         content=ft.Row([
                             ft.Container(content=ft.Icon(i, color=c), padding=10, border_radius=10, bgcolor="white10"),
@@ -269,7 +262,10 @@ def main(page: ft.Page):
             
             return ft.Container(content=ft.Column([
                 ft.Container(padding=20, border_radius=ft.border_radius.only(bottom_left=30, bottom_right=30), bgcolor=tema_renk, content=ft.Column([
-                    ft.Row([ft.IconButton(ft.Icons.MENU, icon_color="white", on_click=menuyu_ac), ft.SegmentedButton(selected={aktif_hesap}, on_change=hesap_degistir, allow_multiple_selection=False, allow_empty_selection=False, style=ft.ButtonStyle(color={ft.MaterialState.SELECTED: "black", ft.MaterialState.DEFAULT: "white"}, bgcolor={ft.MaterialState.SELECTED: "white", ft.MaterialState.DEFAULT: "transparent"}), segments=[ft.Segment(value="kisisel", label=ft.Text("🏠"), icon=ft.Icon(ft.Icons.HOME)), ft.Segment(value="is", label=ft.Text("🏪"), icon=ft.Icon(ft.Icons.STORE))]), ft.IconButton(ft.Icons.CALCULATE, icon_color="white", on_click=hesap_makinesini_ac)], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
+                    ft.Row([ft.IconButton(ft.Icons.MENU, icon_color="white", on_click=menuyu_ac), 
+                            # HATA DÜZELTME: SegmentedButton 'style' parametresi kaldırıldı. Standart görünüm kullanılacak.
+                            ft.SegmentedButton(selected={aktif_hesap}, on_change=hesap_degistir, allow_multiple_selection=False, allow_empty_selection=False, segments=[ft.Segment(value="kisisel", label=ft.Text("🏠"), icon=ft.Icon(ft.Icons.HOME)), ft.Segment(value="is", label=ft.Text("🏪"), icon=ft.Icon(ft.Icons.STORE))]), 
+                            ft.IconButton(ft.Icons.CALCULATE, icon_color="white", on_click=hesap_makinesini_ac)], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
                     ft.Container(height=15), ft.Text("Nakit Durumu (Bakiye)", color="white70", size=12), ft.Text(f"{bakiye} TL", size=40, weight="bold", color="white"), ft.Container(height=20),
                     ft.Container(bgcolor=tema_acik, padding=15, border_radius=15, content=ft.Column([ft.Row([ft.Column([ft.Text("Gelir", color="white70", size=12), ft.Text(f"+{gelir}", color="white", weight="bold")]), ft.Container(width=1, height=30, bgcolor="white24"), ft.Column([ft.Text("Gider", color="white70", size=12), ft.Text(f"-{gider}", color="white", weight="bold")])], alignment=ft.MainAxisAlignment.SPACE_EVENLY), ft.Divider(color="white24", thickness=0.5), ft.Row([ft.Column([ft.Text("Alacak", color="white70", size=12), ft.Text(f"{alacak}", color="white", weight="bold")]), ft.Container(width=1, height=30, bgcolor="white24"), ft.Column([ft.Text("Borç", color="white70", size=12), ft.Text(f"{borc}", color="white", weight="bold")])], alignment=ft.MainAxisAlignment.SPACE_EVENLY)]))
                 ])),
